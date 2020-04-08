@@ -17,9 +17,7 @@ RSpec.describe Api::RecordRepresentationOrder do
 
   let(:params) do
     {
-      prosecution_case_id: prosecution_case_id,
-      defendant_id: defendant_id,
-      offence_id: offence_id,
+      prosecution_case_defendant_offence: prosecution_case_defendant_offence,
       status_code: 'ABCDEF',
       application_reference: 'SOME SORT OF MAAT ID',
       status_date: '2019-12-12',
@@ -33,7 +31,7 @@ RSpec.describe Api::RecordRepresentationOrder do
   let(:url) { "/receive/representation/progression-command-api/command/api/rest/progression/representationOrder/cases/#{prosecution_case_id}/defendants/#{defendant_id}/offences/#{offence_id}" }
   # rubocop:enable Layout/LineLength
 
-  let!(:case_defendant_offence) do
+  let!(:prosecution_case_defendant_offence) do
     ProsecutionCaseDefendantOffence.create!(prosecution_case_id: prosecution_case_id,
                                             defendant_id: defendant_id,
                                             offence_id: offence_id)
@@ -41,7 +39,8 @@ RSpec.describe Api::RecordRepresentationOrder do
 
   it 'returns a no content status' do
     VCR.use_cassette('representation_order_recorder/update') do
-      expect(subject.status).to eq(204)
+      subject
+      expect(prosecution_case_defendant_offence.reload.response_status).to eq(204)
     end
   end
 
@@ -71,14 +70,14 @@ RSpec.describe Api::RecordRepresentationOrder do
 
     it 'updates the database record for the offence' do
       subject
-      case_defendant_offence.reload
-      expect(case_defendant_offence.status_date).to eq '2019-12-12'
-      expect(case_defendant_offence.effective_start_date).to eq '2019-12-15'
-      expect(case_defendant_offence.effective_end_date).to eq '2020-12-15'
-      expect(case_defendant_offence.defence_organisation).to eq defence_organisation
-      expect(case_defendant_offence.rep_order_status).to eq 'ABCDEF'
-      expect(case_defendant_offence.response_status).to eq(200)
-      expect(case_defendant_offence.response_body).to eq({ 'test' => 'test' })
+      prosecution_case_defendant_offence.reload
+      expect(prosecution_case_defendant_offence.status_date).to eq '2019-12-12'
+      expect(prosecution_case_defendant_offence.effective_start_date).to eq '2019-12-15'
+      expect(prosecution_case_defendant_offence.effective_end_date).to eq '2020-12-15'
+      expect(prosecution_case_defendant_offence.defence_organisation).to eq defence_organisation
+      expect(prosecution_case_defendant_offence.rep_order_status).to eq 'ABCDEF'
+      expect(prosecution_case_defendant_offence.response_status).to eq(200)
+      expect(prosecution_case_defendant_offence.response_body).to eq({ 'test' => 'test' })
     end
 
     context 'without an effective_end_date' do

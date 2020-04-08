@@ -19,9 +19,7 @@ class RepresentationOrderCreator < ApplicationService
       prosecution_case = ProsecutionCaseDefendantOffence.find_by!(defendant_id: defendant_id, offence_id: offence[:offence_id])
 
       Api::RecordRepresentationOrder.call(
-        prosecution_case_id: prosecution_case.prosecution_case_id,
-        defendant_id: defendant_id,
-        offence_id: offence[:offence_id],
+        prosecution_case_defendant_offence: prosecution_case,
         status_code: offence[:status_code],
         application_reference: maat_reference,
         status_date: offence[:status_date],

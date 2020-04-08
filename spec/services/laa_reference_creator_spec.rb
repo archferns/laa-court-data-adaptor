@@ -16,6 +16,13 @@ RSpec.describe LaaReferenceCreator do
 
   subject(:create) { described_class.call(maat_reference: maat_reference, defendant_id: defendant_id) }
 
+  let(:connection_double) { double(post: double(status: 202, body: {})) }
+
+  before do
+    allow(CommonPlatformConnection).to receive(:call).and_return(connection_double)
+    allow(Api::RecordLaaReference).to receive(:call).and_call_original
+  end
+
   it 'calls the Api::RecordLaaReference service once' do
     allow(Sqs::PublishLaaReference).to receive(:call)
     expect(Api::RecordLaaReference).to receive(:call).once.with(hash_including(application_reference: maat_reference))

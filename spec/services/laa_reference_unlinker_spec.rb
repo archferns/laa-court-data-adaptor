@@ -16,8 +16,11 @@ RSpec.describe LaaReferenceUnlinker do
                                             offence_id: 'cacbd4d4-9102-4687-98b4-d529be3d5710',
                                             maat_reference: 101_010)
     ActiveRecord::Base.connection.execute('ALTER SEQUENCE dummy_maat_reference_seq RESTART;')
-    allow(Api::RecordLaaReference).to receive(:call)
+    allow(CommonPlatformConnection).to receive(:call).and_return(connection_double)
+    allow(Api::RecordLaaReference).to receive(:call).and_call_original
   end
+
+  let(:connection_double) { double(post: double(status: 202, body: {})) }
 
   subject(:create) { described_class.call(defendant_id: defendant_id, user_name: user_name, unlink_reason_code: unlink_reason_code, unlink_reason_text: unlink_reason_text) }
 

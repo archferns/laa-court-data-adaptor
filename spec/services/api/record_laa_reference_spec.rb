@@ -10,9 +10,7 @@ RSpec.describe Api::RecordLaaReference do
 
   let(:params) do
     {
-      prosecution_case_id: prosecution_case_id,
-      defendant_id: defendant_id,
-      offence_id: offence_id,
+      prosecution_case_defendant_offence: prosecution_case_defendant_offence,
       status_code: 'ABCDEF',
       application_reference: maat_reference,
       status_date: '2019-12-12'
@@ -20,7 +18,7 @@ RSpec.describe Api::RecordLaaReference do
   end
   let(:url) { "/record/laareference/progression-command-api/command/api/rest/progression/laaReference/cases/#{prosecution_case_id}/defendants/#{defendant_id}/offences/#{offence_id}" }
 
-  let!(:case_defendant_offence) do
+  let!(:prosecution_case_defendant_offence) do
     ProsecutionCaseDefendantOffence.create!(prosecution_case_id: prosecution_case_id,
                                             defendant_id: defendant_id,
                                             offence_id: offence_id)
@@ -28,7 +26,8 @@ RSpec.describe Api::RecordLaaReference do
 
   it 'returns a no content status' do
     VCR.use_cassette('laa_reference_recorder/update') do
-      expect(subject.status).to eq(204)
+      subject
+      expect(prosecution_case_defendant_offence.reload.response_status).to eq(204)
     end
   end
 
@@ -55,13 +54,13 @@ RSpec.describe Api::RecordLaaReference do
 
     it 'updates the database record for the offence' do
       subject
-      case_defendant_offence.reload
-      expect(case_defendant_offence.status_date).to eq '2019-12-12'
-      expect(case_defendant_offence.maat_reference).to eq '999999'
-      expect(case_defendant_offence.dummy_maat_reference).to be false
-      expect(case_defendant_offence.rep_order_status).to eq 'ABCDEF'
-      expect(case_defendant_offence.response_status).to eq(200)
-      expect(case_defendant_offence.response_body).to eq({ 'test' => 'test' })
+      prosecution_case_defendant_offence.reload
+      expect(prosecution_case_defendant_offence.status_date).to eq '2019-12-12'
+      expect(prosecution_case_defendant_offence.maat_reference).to eq '999999'
+      expect(prosecution_case_defendant_offence.dummy_maat_reference).to be false
+      expect(prosecution_case_defendant_offence.rep_order_status).to eq 'ABCDEF'
+      expect(prosecution_case_defendant_offence.response_status).to eq(200)
+      expect(prosecution_case_defendant_offence.response_body).to eq({ 'test' => 'test' })
     end
 
     context 'with a A series dummy_maat_reference' do
@@ -69,7 +68,7 @@ RSpec.describe Api::RecordLaaReference do
 
       it 'sets the dummy_maat_reference to true' do
         subject
-        expect(case_defendant_offence.reload.dummy_maat_reference).to be true
+        expect(prosecution_case_defendant_offence.reload.dummy_maat_reference).to be true
       end
     end
 

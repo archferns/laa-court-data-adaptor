@@ -22,7 +22,13 @@ RSpec.describe RepresentationOrderCreator do
       snake_cased_item: 'random value'
     }
   end
+
+  let(:connection_double) { double(post: double(status: 202, body: {})) }
+
   before do
+    allow(CommonPlatformConnection).to receive(:call).and_return(connection_double)
+    allow(Api::RecordRepresentationOrder).to receive(:call).and_call_original
+
     ProsecutionCase.create!(
       id: prosecution_case_id,
       body: JSON.parse(file_fixture('prosecution_case_search_result.json').read)
