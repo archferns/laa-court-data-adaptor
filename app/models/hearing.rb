@@ -56,7 +56,7 @@ class Hearing < ApplicationRecord
   end
 
   def cracked_ineffective_trial
-    return unless cp_cracked_ineffective_trial.present?
+    return if cp_cracked_ineffective_trial.blank?
 
     CrackedIneffectiveTrial.new(body: cp_cracked_ineffective_trial)
   end
