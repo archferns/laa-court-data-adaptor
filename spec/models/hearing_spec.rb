@@ -20,12 +20,18 @@ RSpec.describe Hearing, type: :model do
         end
       end
 
+      it { expect(hearing.id).to eq("4d01840d-5959-4539-a450-d39f57171036") }
       it { expect(hearing.court_name).to eq("Lavender Hill Magistrates' Court") }
       it { expect(hearing.hearing_type).to eq("First hearing") }
+      it { expect(hearing.judge_names).to be_blank }
       it { expect(hearing.defendant_names).to eq(["Kole Jaskolski"]) }
+      it { expect(hearing.prosecution_advocate_names).to be_blank }
+      it { expect(hearing.defence_advocate_names).to be_blank }
       it { expect(hearing.providers).to be_blank }
       it { expect(hearing.provider_ids).to be_blank }
-      it { expect(hearing.judge_names).to be_blank }
+      it { expect(hearing.hearing_days).to eq(["2020-08-17T09:01:01.001Z"]) }
+      it { expect(hearing.cracked_ineffective_trial).to be_nil }
+      it { expect(hearing.cracked_ineffective_trial_id).to be_nil }
 
       context "with hearing events" do
         let(:hearing_day) { "2020-08-17" }
@@ -60,13 +66,15 @@ RSpec.describe Hearing, type: :model do
         end
       end
 
+      it { expect(hearing.id).to eq("29b73d8f-7683-4e27-9069-f7a031672c35") }
+      it { expect(hearing.hearing_type).to eq("Committal for Sentence") }
+      it { expect(hearing.court_name).to eq("Liverpool Crown Court") }
       it { expect(hearing.judge_names).to eq(["Andrew Gwyn Menary"]) }
+      it { expect(hearing.defendant_names).to eq(["Trever Glover"]) }
       it { expect(hearing.prosecution_advocate_names).to eq(["andrew smith"]) }
       it { expect(hearing.defence_advocate_names).to eq(["joe bloggs"]) }
       it { expect(hearing.providers).to all be_a(Provider) }
       it { expect(hearing.provider_ids).to eq(%w[536abfd5-8671-4672-bf33-aa54de5d6a24]) }
-      it { expect(hearing.id).to eq("29b73d8f-7683-4e27-9069-f7a031672c35") }
-      it { expect(hearing.hearing_type).to eq("Committal for Sentence") }
       it { expect(hearing.hearing_days).to eq(["2020-08-18T09:00:00.000Z"]) }
 
       context "when prosecutionCounsels are not provided" do
