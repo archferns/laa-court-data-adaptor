@@ -1,58 +1,58 @@
 # frozen_string_literal: true
 
 RSpec.describe Hearing, type: :model do
-  let(:hearing) { described_class.new(body: "{}") }
   subject { hearing }
 
-  describe "validations" do
-    it { should validate_presence_of(:body) }
-  end
+  let(:hearing) { described_class.new(body: "{}") }
 
-  describe "Common Platform search" do
+  it { is_expected.to validate_presence_of(:body) }
+
+  context "when searching common platform" do
     before do
       allow(HearingsCreatorWorker).to receive(:perform_async)
     end
 
-    let(:hearing_id) { "4d01840d-5959-4539-a450-d39f57171036" }
-
-    let(:hearing) do
-      VCR.use_cassette("hearing_result_fetcher/success") do
-        Api::GetHearingResults.call(hearing_id: hearing_id)
-      end
-    end
-
-    it { expect(hearing.court_name).to eq("Lavender Hill Magistrates' Court") }
-    it { expect(hearing.hearing_type).to eq("First hearing") }
-    it { expect(hearing.defendant_names).to eq(["Kole Jaskolski"]) }
-    it { expect(hearing.providers).to be_blank }
-    it { expect(hearing.provider_ids).to be_blank }
-    it { expect(hearing.judge_names).to be_blank }
-
-    context "hearing events" do
-      let(:hearing_day) { "2020-08-17" }
-
-      let(:hearing_event_recording) do
-        VCR.use_cassette("hearing_logs_fetcher/success") do
-          Api::GetHearingEvents.call(hearing_id: hearing_id, hearing_date: hearing_day)
+    context "with basic hearing data available" do
+      let(:hearing_id) { "4d01840d-5959-4539-a450-d39f57171036" }
+      let(:hearing) do
+        VCR.use_cassette("hearing_result_fetcher/success") do
+          Api::GetHearingResults.call(hearing_id: hearing_id)
         end
       end
 
-      let(:hearing_events) { [hearing_event_recording] }
+      it { expect(hearing.court_name).to eq("Lavender Hill Magistrates' Court") }
+      it { expect(hearing.hearing_type).to eq("First hearing") }
+      it { expect(hearing.defendant_names).to eq(["Kole Jaskolski"]) }
+      it { expect(hearing.providers).to be_blank }
+      it { expect(hearing.provider_ids).to be_blank }
+      it { expect(hearing.judge_names).to be_blank }
 
-      before do
-        allow(Api::GetHearingEvents).to receive(:call).and_return(hearing_events)
-      end
+      context "with hearing events" do
+        let(:hearing_day) { "2020-08-17" }
 
-      it { expect(hearing.hearing_events).to all be_a(HearingEvent) }
+        let(:hearing_event_recording) do
+          VCR.use_cassette("hearing_logs_fetcher/success") do
+            Api::GetHearingEvents.call(hearing_id: hearing_id, hearing_date: hearing_day)
+          end
+        end
 
-      context "with blank hearing events" do
-        let(:hearing_events) { [hearing_event_recording, nil] }
+        let(:hearing_events) { [hearing_event_recording] }
+
+        before do
+          allow(Api::GetHearingEvents).to receive(:call).and_return(hearing_events)
+        end
 
         it { expect(hearing.hearing_events).to all be_a(HearingEvent) }
+
+        context "with blank hearing events" do
+          let(:hearing_events) { [hearing_event_recording, nil] }
+
+          it { expect(hearing.hearing_events).to all be_a(HearingEvent) }
+        end
       end
     end
 
-    context "hearings information" do
+    context "with most hearing data available" do
       let(:hearing_id) { "29b73d8f-7683-4e27-9069-f7a031672c35" }
       let(:hearing) do
         VCR.use_cassette("hearing_result_fetcher/success_hearing_attendees") do
